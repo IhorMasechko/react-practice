@@ -25,7 +25,7 @@ const SearchForm = ({ onSubmit }) => {
         onChange={handleChange}
         value={inputValue}
       />
-      <StyledButtonLarge type="submit">Submit</StyledButtonLarge>
+      <StyledButtonLarge type="submit">Apply Filter</StyledButtonLarge>
     </StyledForm>
   );
 };

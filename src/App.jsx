@@ -1,37 +1,50 @@
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import reactLogo from "./assets/react.svg";
 import SearchForm from "./assets/components/SearchForm/SearchForm";
 import List from "./assets/components/List/List";
 import { StyledWrapper, StyledHeader } from "./Style";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const stories = [
-  {
-    title: "React",
-    url: "https://reactjs.org/",
-    author: "Jordan Walke",
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: "Redux",
-    url: "https://redux.js.org/",
-    author: "Dan Abramov, Andrew Clark",
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-];
+const API = "https://hn.algolia.com/api/v1/search?query=";
 
 function App() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(
+    localStorage.getItem("search") || ""
+  );
+  const [stories, setStories] = useState([]);
+  useEffect(() => {
+    localStorage.setItem("search", searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    fetch(`${API}${searchTerm}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(response.status);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setStories(data.hits);
+      })
+      .catch((error) => {
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [searchTerm]);
 
   const handleSearchTerm = (inputValue) => {
     setSearchTerm(inputValue);
   };
 
-  console.log(searchTerm);
+  const handleRemoveStory = (objectID) => {
+    setStories(stories.filter((story) => story.objectID !== objectID));
+  };
 
   return (
     <StyledWrapper>
@@ -42,7 +55,9 @@ function App() {
         <StyledHeader>Hacker Stories</StyledHeader>
       </div>
       <SearchForm onSubmit={handleSearchTerm} />
-      <List stories={stories} />
+      {isLoading && <p>Loading</p>}
+      {isError && <p>Something went wrong</p>}
+      <List stories={stories} dismiss={handleRemoveStory} />
     </StyledWrapper>
   );
 }
