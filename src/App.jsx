@@ -1,64 +1,55 @@
-import React, { useLayoutEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import SearchForm from "./assets/components/SearchForm/SearchForm";
-import List from "./assets/components/List/List";
-import { StyledWrapper, StyledHeader } from "./Style";
-import { useState, useEffect } from "react";
+import { useCallback, useMemo } from "react";
+import { useState } from "react";
+import { Counter } from "./assets/components/Counter/Counter";
+import { Statistics } from "./assets/components/Statistics/Statistics";
+import { TodoForm } from "./assets/components/TodoForm/TodoForm";
+import { TodoList } from "./assets/components/TodoList/TodoList";
 
-const API = "https://hn.algolia.com/api/v1/search?query=";
+// const todo = {
+//   text: "",
+//   status: false,
+//   id: "",
+// };
 
 function App() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(
-    localStorage.getItem("search") || ""
+  const [todos, setTodos] = useState([]);
+  const [count, setCount] = useState(0);
+  const total = todos.length;
+  const isDoneTodos = useMemo(() => {
+    console.log("recount");
+    return todos.filter((todo) => todo.status).length;
+  }, [todos]);
+
+  const addTodo = useCallback(
+    (todo) => {
+      console.log("add");
+      setTodos([...todos, todo]);
+    },
+    [todos]
   );
-  const [stories, setStories] = useState([]);
-  useEffect(() => {
-    localStorage.setItem("search", searchTerm);
-  }, [searchTerm]);
 
-  useEffect(() => {
-    setIsLoading(true);
-    fetch(`${API}${searchTerm}`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(response.status);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setStories(data.hits);
-      })
-      .catch((error) => {
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [searchTerm]);
+  const changeTodo = useCallback(
+    (id) => {
+      setTodos(
+        todos.map((todo) =>
+          todo.id === id ? { ...todo, status: !todo.status } : todo
+        )
+      );
+    },
+    [todos]
+  );
 
-  const handleSearchTerm = (inputValue) => {
-    setSearchTerm(inputValue);
-  };
-
-  const handleRemoveStory = (objectID) => {
-    setStories(stories.filter((story) => story.objectID !== objectID));
+  const increment = () => {
+    setCount(count + 1);
   };
 
   return (
-    <StyledWrapper>
-      <div>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-        <StyledHeader>Hacker Stories</StyledHeader>
-      </div>
-      <SearchForm onSubmit={handleSearchTerm} />
-      {isLoading && <p>Loading</p>}
-      {isError && <p>Something went wrong</p>}
-      <List stories={stories} dismiss={handleRemoveStory} />
-    </StyledWrapper>
+    <>
+      <Counter increment={increment} />
+      <Statistics total={total} isDoneTodos={isDoneTodos} />
+      <TodoForm addTodo={addTodo} />
+      <TodoList changeTodo={changeTodo} todos={todos} />
+    </>
   );
 }
 
