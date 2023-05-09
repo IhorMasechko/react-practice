@@ -14,30 +14,6 @@ import { TodoList } from "./assets/components/TodoList/TodoList";
 function App() {
   const [todos, setTodos] = useState([]);
   const [count, setCount] = useState(0);
-  const total = todos.length;
-  const isDoneTodos = useMemo(() => {
-    console.log("recount");
-    return todos.filter((todo) => todo.status).length;
-  }, [todos]);
-
-  const addTodo = useCallback(
-    (todo) => {
-      console.log("add");
-      setTodos([...todos, todo]);
-    },
-    [todos]
-  );
-
-  const changeTodo = useCallback(
-    (id) => {
-      setTodos(
-        todos.map((todo) =>
-          todo.id === id ? { ...todo, status: !todo.status } : todo
-        )
-      );
-    },
-    [todos]
-  );
 
   const increment = () => {
     setCount(count + 1);
@@ -46,9 +22,9 @@ function App() {
   return (
     <>
       <Counter increment={increment} />
-      <Statistics total={total} isDoneTodos={isDoneTodos} />
-      <TodoForm addTodo={addTodo} />
-      <TodoList changeTodo={changeTodo} todos={todos} />
+      <Statistics />
+      <TodoForm />
+      <TodoList />
     </>
   );
 }

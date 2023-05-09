@@ -1,6 +1,14 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { changeTodo } from "../../redux/todos/todosSlice";
 
-export const TodoList = ({ changeTodo, todos }) => {
+export const TodoList = () => {
+  const todos = useSelector((state) => state.todos);
+  const dispatch = useDispatch();
+  const launchTodoChange = (id) => {
+    dispatch(changeTodo(id));
+  };
+
   return (
     <ul>
       {todos.map((todo) => (
@@ -9,7 +17,7 @@ export const TodoList = ({ changeTodo, todos }) => {
           <input
             type="checkbox"
             checked={todo.status}
-            onChange={() => changeTodo(todo.id)}
+            onChange={() => launchTodoChange(todo.id)}
           />
         </li>
       ))}
